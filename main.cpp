@@ -1,16 +1,3 @@
-/*
- * 实现一个list类命名为MyList，其功能与python数组类似。可以用数组实现，也可以用链表实现。
- * 必须使用template <class T>，不允许使用<iostream>以外的库。
- * 需要实现的功能与测试代码见下。请务必搞清楚每一项的意义，比如什么时候需要用友元函数什么时候需要const什么时候需要&。
- * 当某些由用户正常操作可能产生的run time error（如pop一个空数组，或访问一个超出下标的元素），
- * 请使用try-catch-throw处理错误。
- * 以下类定义不保证完全正确，请根据实际需求修改，以实现样例功能为主。
- */
-
-/*
- * 本练习不涉及到虚类和类继承，但是期末考试我就不知道了。如果有时间可以用书上的shape类来练习。
- */
-
 #include<iostream>
 using namespace std;
 
@@ -26,7 +13,7 @@ private:
         for (int i = 0;i < size/2;++i) b[i] = a[i];
         delete [] a;
         a = b;
-    }//数组大小不够的时候将数组大小翻倍的操作。
+    }//double the list when necessary
     void quickSort(T a[],int s,int e){
         if (s < e){
             int k = a[s];
@@ -59,16 +46,16 @@ public:
             a = new T [100];
             cout << "Error! the size of the array can't less than or equal to 0" << endl;
         }
-    }//将item重复num次填入数组中。
+    }//fill the list with item for num times
     MyList(const MyList &l){
         size = l.size;
         a = new T [size];
         for (int i = 0;i < size;++i) a[i] = *(l.a + i);
-    }//深复制另外一个MyList。
+    }//duplicate another list
     MyList(T* arr, int len){
         try{
             int com = sizeof(arr)/sizeof(T);
-            if(len > com) throw 0;
+            if(len > com || len < 0) throw 0;
             size = len;
             a = new T [size];
             for (int i = 0;i < size;++i) a[i] = arr[i];
@@ -78,13 +65,13 @@ public:
             a = new T [100];
             cout << "Error! len is greater than the size of array" << endl;
         }
-    }//以arr的前len个元素构造数组
+    }//construct the list with the elements in the array
     
     void push(const T &item){
         double_space();
         size = size/2 + 1;
         a[size-1] = item;
-    }//将item添加在MyList最后。
+    }//add item at the end of the list
     T pop(){
         try{
             if (size == 0) throw 0;
@@ -95,7 +82,7 @@ public:
             cout << "Error! There is no element in your list" << endl;
             return a[0];
         }
-    }//将MyList中最后一个元素删除，并返回这个删除的元素。
+    }//delete the last element in the list and return it at the same time
     void insert(int index, const T &item){
         try{
             if (index < -size) throw 0;
@@ -115,13 +102,13 @@ public:
             }
         }
         catch(int) {cout << "illegal input" << endl;}
-    }//将item插入到place处。
+    }//insert item at requiring place
     void clean(){
         size = 0;
-    }//清空数组。
+    }//clean the list
     int get_size(){
         return size;
-    }//返回MyList中元素的数量。
+    }//return the size
     void erase(int start, int end){
         try{
             if (start < -size || end < -size) throw false;
@@ -145,7 +132,7 @@ public:
         catch (bool){
             cout << "illegal input" << endl;
         }
-    }//删除MyList中第start到第end位的元素，包括两边。
+    }//delete elements in the list from start to end, including the start and the end
     T get_item(int index){
         try {
             if (index < -size) throw 0.0;
@@ -161,7 +148,7 @@ public:
             cout << "illegal input" << endl;
             return a[0];
         }
-    }//返回第index个元素。
+    }//return the required element
     MyList get_item(int start, int end){
         MyList<T> b;
         while (start < 0) start += size;
@@ -187,14 +174,14 @@ public:
             b.clean();
         }
         return b;
-    }//返回MyList中第start到第end位的元素，包括两边。此处需要像python一样接受负数，具体见测试代码。
+    }//return elements from start to end
     int count(const T &item){
         int num = 0;
         for (int i = 0;i < size;++i) {
             if(a[i] == item) ++num;
         }
         return num;
-    }//返回MyList中和item相等的元素的个数。
+    }//return the number of items in the list which is the same as the given one
     void remove(const T &item){
         int i;
         T * b = new T [size];
@@ -214,7 +201,7 @@ public:
         --size;
         delete [] a;
         a = b;
-    }//删除MyList中第一个和item相等的元素。
+    }//delete the element it found first which is the same as the given one
     
     
     friend MyList operator + (const MyList &l1, const MyList &l2){
@@ -225,12 +212,12 @@ public:
             result.a[i+l1.size] = l2.a[i];
         }
         return result;
-    }//合并两个MyList
+    }//merge the two lists
     friend MyList operator + (const MyList &l1, const T &item){
         MyList<T> result = l1;
         result.push(item);
         return result;
-    }//同push(T item)，但不修改l1，返回一个新数组
+    }//similar to push which will create a new list instead of change any one
     MyList &operator = (const MyList &l){
         delete [] a;
         size = l.size;
@@ -239,15 +226,15 @@ public:
             a[i] = l.a[i];
         }
         return *this;
-    }//赋值
+    }
     MyList &operator += (const T &item){
         push(item);
         return *this;
-    }//同push(T item)
+    }//similar to push
     MyList &operator += (const MyList &l){
         for (int i = 0;i < l.size;++i) push(l.a[i]);
         return *this;
-    }//将一个MyList加入到本个MyList之后。
+    }//add a list behind the present list
     T &operator [](int index){
         try{
             if (index < -size) throw 0;
@@ -263,7 +250,7 @@ public:
             cout << "out of range" << endl;
             return a[0];
         }
-    }//返回第index个元素。
+    }//return the element at the position of index
     friend ostream & operator<<(ostream &os, const MyList &obj){
         os << '[';
         int i;
@@ -274,7 +261,7 @@ public:
             os << obj.a[i];
         os << ']';
         return os;
-    }//如果T是可以直接cout的类的话（比如int），按Python数组的格式输出MyList中的每一个元素，例如：
+    }//if T can be cout, cout the list
     // [1, 2, 5, 4, 1]
     
     void sort(bool less=true){
@@ -286,8 +273,8 @@ public:
         catch(int) {
             cout << "No element to be sorted" << endl;
         }
-    }//实现一个快速排序或归并排序，对支持比较运算符（>=<）的类进行排序。
-    // 若less=true，按照从小到大排列，否则按从大到小排列
+    }//sort the list when T template supported for comparing
+    // if less = true, the list is sorted from small to large; otherwise, reversed
     void reverse(){
         T * b = new T [size];
         for (int i = 0;i < size;++i){
@@ -295,7 +282,7 @@ public:
         }
         delete [] a;
         a = b;
-    }//将MyList的元素倒过来。
+    }//reverse the element in the list
     
     ~MyList(){delete [] a;}
 };
